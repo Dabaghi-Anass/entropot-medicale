@@ -1,0 +1,62 @@
+flowchart TD
+    %% SOURCE DATA
+    S1[hopital.csv] --> ST1[hopital table]
+    S2[hopital_service.csv] --> ST2[hopital_services table]
+    S3[medecins.csv] --> ST3[medecins table]
+    
+    %% STAGING DATABASE
+    subgraph "Staging Database<br/>chargement_des_donnees"
+        ST1
+        ST2
+        ST3
+    end
+    
+    %% ETL PROCESS
+    ST1 -->|ETL| DW1[dim_hopital]
+    ST2 -->|ETL| DW3[dim_services<br/>fact_hospital_services]
+    ST3 -->|ETL| DW2[dim_medecin<br/>fact_doctor_assignments]
+    
+    %% DATA WAREHOUSE
+    subgraph "Data Warehouse<br/>hopital_data_warehouse"
+        subgraph "Dimension Tables"
+            DW1
+            DW2
+            DW3
+        end
+        
+        subgraph "Fact Tables"
+            FT1[fact_doctor_assignments]
+            FT2[fact_hospital_services]
+        end
+    end
+    
+    %% ANALYTICAL VIEWS
+    FT1 --> V1[vw_assignments]
+    FT2 --> V2[vw_services]
+    DW1 --> V3[vw_hospital_summary]
+    
+    subgraph "Analytical Layer"
+        V1
+        V2
+        V3
+    end
+    
+    %% BUSINESS USERS
+    V1 --> BU1[Business Analysts]
+    V2 --> BU2[Hospital Administrators]
+    V3 --> BU3[Health Officials]
+    
+    %% STYLING
+    classDef source fill:#bbdefb,stroke:#0d47a1
+    classDef staging fill:#c8e6c9,stroke:#1b5e20
+    classDef dimension fill:#fff9c4,stroke:#f57f17
+    classDef fact fill:#ffccbc,stroke:#bf360c
+    classDef view fill:#d1c4e9,stroke:#311b92
+    classDef user fill:#f8bbd0,stroke:#880e4f
+    
+    class S1,S2,S3 source
+    class ST1,ST2,ST3 staging
+    class DW1,DW2,DW3 dimension
+    class FT1,FT2 fact
+    class V1,V2,V3 view
+    class BU1,BU2,BU3 user

@@ -1,0 +1,51 @@
+---
+config:
+  theme: redux-color
+  layout: elk
+title: Sample title
+---
+erDiagram
+	direction LR
+	dim_hopital {
+		INT hopital_id PK "Auto Increment"  
+		VARCHAR finess UK "UNIQUE, NOT NULL"  
+		VARCHAR nom  "NOT NULL"  
+		VARCHAR region  ""  
+		VARCHAR departement  ""  
+		VARCHAR ville  ""  
+		VARCHAR categorie  ""  
+	}
+
+	fact_doctor_assignments {
+		INT assignment_id PK "Auto Increment"  
+		INT hopital_id FK "NOT NULL"  
+		INT medecin_id FK "NOT NULL"  
+		DATE date_chargement  "DEFAULT CURDATE()"  
+	}
+
+	fact_hospital_services {
+		INT service_fact_id PK "Auto Increment"  
+		INT hopital_id FK "NOT NULL"  
+		INT service_id FK "NOT NULL"  
+		BOOLEAN disponible  "DEFAULT TRUE"  
+		DATE date_chargement  "DEFAULT CURDATE()"  
+	}
+
+	dim_medecin {
+		INT medecin_id PK "Auto Increment"  
+		VARCHAR rpps UK "UNIQUE, NOT NULL"  
+		VARCHAR nom  "NOT NULL"  
+		VARCHAR prenom  "NOT NULL"  
+		VARCHAR specialite  ""  
+		VARCHAR statut  ""  
+	}
+
+	dim_services {
+		INT service_id PK "Auto Increment"  
+		VARCHAR service_nom UK "UNIQUE, NOT NULL"  
+	}
+
+	dim_hopital||--o{fact_doctor_assignments:"has"
+	dim_hopital||--o{fact_hospital_services:"provides"
+	dim_medecin||--o{fact_doctor_assignments:"assigned to"
+	dim_services||--o{fact_hospital_services:"available at"
