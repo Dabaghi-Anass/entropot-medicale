@@ -1,0 +1,173 @@
+erDiagram
+
+    %% =========================
+    %% BRONZE / RAW TABLES
+    %% =========================
+    emergency_passages {
+        varchar id
+        varchar code_departement
+        varchar date_de_passage
+        varchar sursaud_cl_age_corona
+        varchar nbre_pass_corona
+        varchar nbre_pass_tot
+        varchar nbre_hospit_corona
+        varchar nbre_pass_corona_h
+        varchar nbre_pass_corona_f
+        varchar nbre_pass_tot_h
+        varchar nbre_pass_tot_f
+        varchar nbre_hospit_corona_h
+        varchar nbre_hospit_corona_f
+        varchar nbre_acte_corona
+        varchar nbre_acte_tot
+        varchar nbre_acte_corona_h
+        varchar nbre_acte_corona_f
+        varchar nbre_acte_tot_h
+        varchar nbre_acte_tot_f
+        datetime dwh_create_date
+    }
+
+    hospitals_with_departements {
+        int __id PK
+        varchar finess_et
+        varchar finess_ej
+        varchar raison_sociale
+        varchar raison_sociale_entite_juridique
+        varchar adresse_complete
+        varchar num_dept
+        varchar dept
+        varchar cp_ville
+        varchar num_tel
+        varchar num_fax
+        varchar categorie_de_l_etablissement
+        varchar type_etablissement
+        varchar num_siret
+        varchar code_ape
+        varchar lib_tarification
+        varchar date_ouverture
+        varchar lat
+        varchar lng
+        datetime dwh_create_date
+    }
+
+    medecins {
+        varchar id
+        varchar N_RPPS
+        varchar Nom
+        varchar Prenom
+        varchar Specialite
+        varchar Date_accreditation
+        varchar Departement
+        varchar FINESS
+        varchar Statut
+        datetime dwh_create_date
+    }
+
+    %% =========================
+    %% DIMENSION TABLES
+    %% =========================
+    regions {
+        int region_id PK
+        varchar name
+    }
+
+    provinces {
+        int province_id PK
+        varchar name
+        int region_id FK
+    }
+
+    cities {
+        int city_id PK
+        varchar name
+        int province_id FK
+        int region_id FK
+    }
+
+    facility_types {
+        int facility_type_id PK
+        varchar name
+    }
+
+    ownership_types {
+        int ownership_type_id PK
+        varchar name
+    }
+
+    sources {
+        int source_id PK
+        varchar name
+        text description
+    }
+
+    %% =========================
+    %% FACT / CORE TABLES
+    %% =========================
+    hospitals {
+        int hospital_id PK
+        varchar name_arabic
+        varchar name_french
+        varchar name_english
+        varchar display_name
+        int city_id FK
+        int province_id FK
+        int region_id FK
+        text street_address
+        decimal latitude
+        decimal longitude
+        int facility_type_id FK
+        int ownership_type_id FK
+        varchar operational_status
+        int capacity_beds
+        text services_specializations
+        varchar contact_phone
+        varchar contact_email
+        varchar website
+        int year_established
+        int year_closed
+        text accreditation_licensing
+        text historical_notes
+        int source_id FK
+        varchar source_record_key
+        text raw_source
+    }
+
+    hospital_stats_moh {
+        int stat_id PK
+        int hospital_id FK
+        int annee_mise_service
+        int capacite_theorique
+        int capacite_fonctionnelle
+        int medecins
+        int infirmiers
+        int personnel_administratif
+        varchar mode_gestion
+        varchar statut_juridique
+        text services_specialises
+        text equipements_biomedicaux
+    }
+
+    hospital_reports {
+        int report_id PK
+        varchar hospital_name
+        varchar report_type
+        varchar report_period
+        varchar source_name
+        json raw_json
+    }
+
+    %% =========================
+    %% RELATIONSHIPS
+    %% =========================
+    regions ||--o{ provinces : contains
+    provinces ||--o{ cities : contains
+    regions ||--o{ cities : contains
+
+    cities ||--o{ hospitals : located_in
+    provinces ||--o{ hospitals : located_in
+    regions ||--o{ hospitals : located_in
+
+    facility_types ||--o{ hospitals : categorizes
+    ownership_types ||--o{ hospitals : owns
+    sources ||--o{ hospitals : provides
+
+    hospitals ||--o{ hospital_stats_moh : has
